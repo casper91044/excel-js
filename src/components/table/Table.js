@@ -1,6 +1,7 @@
 import {ExcelComponent} from "@core/ExcelComponent";
 import {createTable} from "@/components/table/table.template";
-import {$} from "@core/dom";
+import {resizeHandler} from "@/components/table/table.resize";
+import {shouldResize} from "@/components/table/table.functions";
 
 
 export class Table extends ExcelComponent {
@@ -9,7 +10,7 @@ export class Table extends ExcelComponent {
     constructor($root) {
         super($root, {
             listeners: ['mousedown']
-        });
+        })
     }
 
     toHTML() {
@@ -17,30 +18,8 @@ export class Table extends ExcelComponent {
     }
 
     onMousedown(event) {
-        if (event.target.dataset.resize) {
-            const $resizer = $(event.target)
-            const $parent = $resizer.closest('[data-type="resizable"]')
-            const coords = $parent.getCoords()
-
-            document.onmousemove = e => {
-                const delta = e.pageX - coords.right
-                const value = coords.width + delta
-                $parent.$el.style.width = value + 'px'
-                document.querySelectorAll(`[data-col="${$parent.data.col}"]`)
-                    .forEach(el => el.style.width = value + 'px')
-            }
-
-            document.onmouseup = () => {
-                document.onmousemove = null
-            }
+        if (shouldResize(event)) {
+            resizeHandler(this.$root, event)
         }
     }
-
-    //
-    // onMousemove() {
-    //     console.log('mousemove')
-    // }
-    // onMouseup() {
-    //     console.log('mouseup')
-    // }
 }
